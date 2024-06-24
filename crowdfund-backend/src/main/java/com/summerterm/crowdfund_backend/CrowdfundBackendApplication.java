@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CrowdfundBackendApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(CrowdfundBackendApplication.class, args);
 	}
-
 }
