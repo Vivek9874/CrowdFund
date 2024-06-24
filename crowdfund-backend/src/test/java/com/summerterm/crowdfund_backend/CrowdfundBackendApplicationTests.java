@@ -1,10 +1,10 @@
-package com.summerterm.crowdfund;
+package com.summerterm.crowdfund_backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CrowdfundApplicationTests {
+class CrowdfundBackendApplicationTests {
 
 	@Test
 	void contextLoads() {
