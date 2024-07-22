@@ -1,0 +1,22 @@
+.custom-card {
+    padding-right: 15px;
+    padding-left: 15px;/* Adjust padding as needed */
+    margin-bottom: 20px; /* Adjust margin as needed */
+    border: 2px solid #ddd; /* Optional: Add border */
+    border-radius: 10px; /* Optional: Add border-radius */
+}
+
+.custom-card .card-body {
+    padding: 15px; /* Adjust padding inside the card body */
+}
+
+.custom-button {
+    background-color: #463f3a; /* Change the background color of the button */
+    color: #FFFFFF; /* Ensure the text color is white for contrast */
+    border: none; /* Optional: remove border if desired */
+}
+
+.custom-button:hover {
+    background-color: #3e3734; /* Slightly darker shade for hover effect */
+    color: #FFFFFF; /* Ensure text remains white */
+}

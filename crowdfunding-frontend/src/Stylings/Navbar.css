@@ -1,0 +1,56 @@
+/* Ensure the navbar is fully responsive */
+.custom-navbar {
+    background-color: #463f3a; /* Background color */
+    font-size: large;
+}
+
+/* NavbarComponent Brand */
+.custom-navbar .navbar-brand {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+/* NavbarComponent Links */
+.custom-navbar .nav-link {
+    color: #FFFFFF; /* White text for links */
+}
+
+/* Ensure dropdown menu has a solid background */
+.custom-navbar .navbar-collapse {
+    background-color: #463f3a; /* Match this to navbar background */
+    z-index: 1050; /* Ensure it appears on top */
+}
+
+/* Dropdown Menu Styles */
+.custom-navbar .navbar-nav .dropdown-menu {
+    background-color: #463f3a; /* Match dropdown background with navbar */
+    border: none; /* Remove default border */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Add a subtle shadow for visibility */
+}
+
+/* Dropdown Menu Items */
+.custom-navbar .navbar-nav .dropdown-menu .dropdown-item {
+    color: #FFFFFF; /* White text */
+}
+
+/* Dropdown Item Hover Effect */
+.custom-navbar .navbar-nav .dropdown-menu .dropdown-item:hover {
+    background-color: #3e3734; /* Darker background on hover */
+}
+
+/* Button Styles */
+.custom-navbar .btn-outline-light {
+    color: #FFFFFF; /* White text */
+    border-color: #FFFFFF; /* White border */
+}
+
+.custom-navbar .btn-outline-light:hover {
+    background-color: #3e3734; /* Slightly darker shade for hover */
+    border-color: #FFFFFF; /* Ensure border remains white */
+    color: #FFFFFF; /* Ensure text remains white */
+}
+
+/* NavbarComponent Toggler Icon */
+.custom-navbar .navbar-toggler-icon {
+    background-image: none; /* Remove any custom background images */
+}
