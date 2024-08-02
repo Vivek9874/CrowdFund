@@ -22,3 +22,6 @@ Thumbs.db
 !*/package.json
 !*/package-lock.json
 !*/yarn.lock
+
+#ignore intellij folder
+.idea
