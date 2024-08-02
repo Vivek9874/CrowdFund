@@ -18,3 +18,7 @@ Thumbs.db
 # Ignore specific file types
 *.tmp
 *.swp
+# Ensure package.json and package-lock.json (or yarn.lock) are tracked
+!*/package.json
+!*/package-lock.json
+!*/yarn.lock
