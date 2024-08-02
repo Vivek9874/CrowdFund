@@ -24,4 +24,4 @@ Thumbs.db
 !*/yarn.lock
 
 #ignore intellij folder
-.idea
+.idea/
