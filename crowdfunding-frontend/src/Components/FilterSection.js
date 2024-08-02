@@ -1,27 +1,26 @@
+// FilterSection.js
 import React from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
-const FilterSection = ({ onFilterChange }) => {
-    const handleFilterChange = (event) => {
-        const { name, value } = event.target;
-        onFilterChange(name, value);
-    };
-
+const FilterSection = ({ selectedCategory, onCategoryChange }) => {
     return (
         <div className="filter-section p-3">
-            <h5>Filter Fundraisers</h5>
+            <h5>Filter by Category</h5>
             <Form>
-                <Form.Group controlId="categoryFilter">
+                <Form.Group controlId="filterCategory">
                     <Form.Label>Category</Form.Label>
-                    <Form.Control as="select" name="category" onChange={handleFilterChange}>
-                        <option>All</option>
-                        <option>Health</option>
-                        <option>Education</option>
-                        <option>Environment</option>
-                        <option>Community</option>
+                    <Form.Control
+                        as="select"
+                        value={selectedCategory}
+                        onChange={(e) => onCategoryChange(e.target.value)}
+                    >
+                        <option value="">All</option>
+                        <option value="Health">Health</option>
+                        <option value="Education">Education</option>
+                        <option value="Environment">Environment</option>
+                        <option value="Community">Community</option>
                     </Form.Control>
                 </Form.Group>
-                <Button variant="primary" className="mt-3">Apply Filters</Button>
             </Form>
         </div>
     );

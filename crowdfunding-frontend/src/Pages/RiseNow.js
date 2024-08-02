@@ -1,29 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Navbar, Nav, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import FilterSection from '../Components/FilterSection';
-import FundraiserSection from '../Components/FundraiserSection';
-import CreateFundraiserSection from '../Components/CreateFundraiserSection';
+// import FundraiserSection from '../Components/FundraiserSection';
 import FundraiserDetailsModal from '../Components/FundraiserDetailsModal';
 import NavbarComponent from '../Components/NavbarComponent';
 import FooterComponent from '../Components/FooterComponent';
+import CustomButton from '../Components/CustomButton';
 import '../Stylings/RiseNow.css';
+import { competition } from '../Images';
+import axios from 'axios';
 
 const RiseNow = () => {
+    //const location = useLocation();
     const navigate = useNavigate();
-
-    const [filters, setFilters] = useState({ category: 'All' });
-    const [fundraisers, setFundraisers] = useState([
-        { id: 1, title: 'Health Fundraiser 1', description: 'Support health initiatives', image: 'https://via.placeholder.com/300x200', category: 'Health' },
-        { id: 2, title: 'Education Fundraiser 1', description: 'Support education initiatives', image: 'https://via.placeholder.com/300x200', category: 'Education' },
-        { id: 3, title: 'Environment Fundraiser 1', description: 'Support environment initiatives', image: 'https://via.placeholder.com/300x200', category: 'Environment' },
-    ]);
+    const [fundraisers, setFundraisers] = useState([]);
     const [selectedFundraiser, setSelectedFundraiser] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('');
 
-    const handleFilterChange = (name, value) => {
-        setFilters({ ...filters, [name]: value });
-    };
+    // Load fundraisers from localStorage
+    /*useEffect(async () => {
+        const imageResponse = await axios.get('/api/users/fundraisers');
+        console.log('Image Respone', imageResponse);
+
+        //const storedFundraisers = JSON.parse(localStorage.getItem('fundraisers')) || [];
+        //setFundraisers(storedFundraisers);
+    }, []);*/
+    useEffect(() => {
+        async function fetchData() {
+            // You can await here
+            const imageResponse = await axios.get('/api/users/fundraisers');
+            //store data in state here
+            // console.log('Image Respone', imageResponse);
+            setFundraisers(imageResponse.data);
+            // ...
+        }
+        fetchData();
+    }, []);
+
+
+    // Add new fundraiser if state is provided
+    /*useEffect(() => {
+        if (location.state && location.state.newFundraiser) {
+            const newFundraiser = location.state.newFundraiser;
+            setFundraisers(prevFundraisers => {
+                const updatedFundraisers = [...prevFundraisers, newFundraiser];
+                localStorage.setItem('fundraisers', JSON.stringify(updatedFundraisers));
+                return updatedFundraisers;
+            });
+            navigate('.', { replace: true, state: {} });
+        }
+    }, [location.state, navigate]);*/
 
     const handleShowDetails = (fundraiser) => {
         setSelectedFundraiser(fundraiser);
@@ -34,29 +62,76 @@ const RiseNow = () => {
         setShowModal(false);
     };
 
-    const filteredFundraisers = fundraisers.filter(fundraiser => filters.category === 'All' || fundraiser.category === filters.category);
+    // const handleDelete = (id) => {
+    //     const updatedFundraisers = fundraisers.filter(fundraiser => fundraiser.id !== id);
+    //     setFundraisers(updatedFundraisers);
+    //     localStorage.setItem('fundraisers', JSON.stringify(updatedFundraisers));
+    // };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`/api/users/fundraisers/${id}`);
+            const updatedFundraisers = fundraisers.filter(fundraiser => fundraiser._id !== id);
+            setFundraisers(updatedFundraisers);
+        } catch (error) {
+            console.error('Error deleting fundraiser:', error);
+        }
+    };
+
+    const handleFundraiserForm = () => {
+        navigate('/RaiserForm');
+    };
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category);
+    };
+
+    // Filter fundraisers based on selected category
+    const filteredFundraisers = selectedCategory
+        ? fundraisers.filter(fundraiser => fundraiser.category === selectedCategory)
+        : fundraisers;
 
     return (
         <div id="root">
-            <NavbarComponent/>
-
+            <NavbarComponent />
             <Container fluid className="main-content">
-                <Row>
-                    <Col md={3}>
-                        <FilterSection onFilterChange={handleFilterChange} />
-                    </Col>
+                <Row className="align-items-center my-4">
                     <Col md={6}>
-                        <FundraiserSection fundraisers={filteredFundraisers} onShowDetails={handleShowDetails} />
+                        <p>RiseNow is dedicated to helping individuals and organizations raise funds for their causes. Whether you're looking to start a new project or support an existing one, we provide the tools and resources you need to make a difference.</p>
+                        <CustomButton className="custom-button custom-button-small" onClick={handleFundraiserForm}>Get Started</CustomButton>
                     </Col>
-                    <Col md={3}>
-                        <CreateFundraiserSection />
+                    <Col md={6} className="d-flex justify-content-end">
+                        <img src={competition} alt="About RiseNow" className="img-fluid" style={{ width: '300px' }} />
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col md={3} className="shadow-sm">
+                        <FilterSection selectedCategory={selectedCategory} onCategoryChange={handleCategoryChange} />
+                    </Col>
+                    <Col md={9} className="shadow-sm">
+                        <div className="d-flex flex-wrap">
+                            {filteredFundraisers.map(fundraiser => (
+                                <Card key={fundraiser._id} style={{ width: '18rem', margin: '10px' }} className="d-flex flex-column justify-content-between">
+                                    <Card.Img variant="top" src={fundraiser.imageUrl} alt='hello' />
+                                    <Card.Body className="d-flex flex-column">
+                                        <b><Card.Title>{fundraiser.title}</Card.Title></b>
+                                        <Card.Text>{fundraiser.description}</Card.Text>
+                                        <div className="mt-auto d-flex justify-content-center">
+                                            <Button variant="primary" className="me-2" onClick={() => handleShowDetails(fundraiser)} style={{backgroundColor: '#463F3A', border: 'none'}}>View Details</Button>
+                                            <Button variant="danger" onClick={() => handleDelete(fundraiser._id)}>Delete</Button>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            ))}
+                        </div>
                     </Col>
                 </Row>
             </Container>
 
             <FundraiserDetailsModal show={showModal} onHide={handleHideModal} fundraiser={selectedFundraiser} />
 
-            <FooterComponent/>
+            <FooterComponent />
         </div>
     );
 };

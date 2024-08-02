@@ -1,18 +1,16 @@
-/* Add styles specific to the footer component here */
-/* Example footer styles */
 .custom-footer {
-    background-color: #463f3a; /* Background color */
-    color: #FFFFFF; /* White text */
+    background-color: #463f3a;
+    color: #FFFFFF;
     padding: 20px;
     text-align: center;
     font-size: medium;
 }
 
 .custom-footer a {
-    color: #FFFFFF; /* White text for links */
+    color: #FFFFFF;
     text-decoration: none;
 }
 
 .custom-footer a:hover {
-    color: #d3d3d3; /* Light grey text on hover */
+    color: #d3d3d3;
 }

@@ -1,10 +1,9 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -18,7 +17,7 @@ function Copyright(props) {
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
             <Link color="inherit" href="https://google.com">
-                PawsPatron
+                IdeaLift
             </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
@@ -26,18 +25,84 @@ function Copyright(props) {
     );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 function SignIn() {
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
+    const [formValues, setFormValues] = React.useState({
+        email: '',
+        password: ''
+    });
+
+    const [errors, setErrors] = React.useState({
+        email: '',
+        password: ''
+    });
+
+    const [error, setError] = React.useState(null); // State for server-side error message
+    const navigate = useNavigate();
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setFormValues({
+            ...formValues,
+            [name]: value
         });
+    };
+
+    const validateForm = () => {
+        let valid = true;
+        const newErrors = {
+            email: '',
+            password: ''
+        };
+
+        if (!formValues.email) {
+            newErrors.email = 'Email is required';
+            valid = false;
+        }
+        if (!formValues.password) {
+            newErrors.password = 'Password is required';
+            valid = false;
+        }
+
+        setErrors(newErrors);
+        return valid;
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        if (!validateForm()) {
+            return; // Prevent form submission if validation fails
+        }
+
+        const userData = {
+            email: formValues.email,
+            password: formValues.password,
+        };
+
+        try {
+            const response = await fetch('http://localhost:5000/api/users/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                //sessionStorage.removeItem('token'); // To ensure only one token is stored
+                sessionStorage.setItem('token', result.token); // Store the JWT token using sessionStorage
+                sessionStorage.setItem('user', JSON.stringify(result.user));
+                navigate('/'); // Redirect to homepage
+            } else {
+                const result = await response.json();
+                setError(result.message); // Set error message
+            }
+        } catch (error) {
+            setError('An unexpected error occurred'); // Set generic error message
+        }
     };
 
     return (
@@ -68,6 +133,10 @@ function SignIn() {
                             name="email"
                             autoComplete="email"
                             autoFocus
+                            value={formValues.email}
+                            onChange={handleChange}
+                            error={!!errors.email}
+                            helperText={errors.email}
                         />
                         <TextField
                             margin="normal"
@@ -78,10 +147,10 @@ function SignIn() {
                             type="password"
                             id="password"
                             autoComplete="current-password"
-                        />
-                        <FormControlLabel
-                            control={<Checkbox value="remember" color="primary" />}
-                            label="Remember me"
+                            value={formValues.password}
+                            onChange={handleChange}
+                            error={!!errors.password}
+                            helperText={errors.password}
                         />
                         <Button
                             type="submit"
@@ -91,12 +160,8 @@ function SignIn() {
                         >
                             Sign In
                         </Button>
+                        {error && <Typography color="error">{error}</Typography>} {/* Display error */}
                         <Grid container>
-                            <Grid item xs>
-                                <Link href="#" variant="body2">
-                                    Forgot password?
-                                </Link>
-                            </Grid>
                             <Grid item>
                                 <Link href="/sign-up" variant="body2">
                                     {"Don't have an account? Sign Up"}
@@ -110,4 +175,5 @@ function SignIn() {
         </ThemeProvider>
     );
 }
+
 export default SignIn;

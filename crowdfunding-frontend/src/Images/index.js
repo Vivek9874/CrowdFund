@@ -8,8 +8,10 @@ import animalrights from './animalfarm.jpg';
 import currencybro from './Currency-bro.svg'
 import familybro from './disabled.jpg';
 import baby1 from './baby1.jpg';
+import competition from './Competition.svg';
 
 export {
+    competition,
     baby1,
     familybro,
     currencybro,

@@ -1,18 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card } from 'react-bootstrap';
 import NavbarComponent from '../Components/NavbarComponent';
 import FooterComponent from '../Components/FooterComponent';
-import { animalrights, baby1, currencybro, familybro } from '../Images';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { currencybro } from '../Images';
+import CustomButton from "../Components/CustomButton";
 import '../Stylings/Home.css';
+import 'bootstrap/dist/css/bootstrap.min.css';  // Import Bootstrap CSS
 
 const Home = () => {
     const navigate = useNavigate();
+    const [fundraisers, setFundraisers] = useState([]);
 
-    const handleSignUpClick = () => {
-        navigate('/sign-up');
-    };
+    const handleStartedClick = () => {
+        navigate('/RiseNow');
+    }
+
+    useEffect(() => {
+        async function fetchFundraisers() {
+            try {
+                const response = await axios.get('/api/users/fundraisers');
+                setFundraisers(response.data.slice(0, 3)); // Get only the first 3 fundraisers
+            } catch (error) {
+                console.error('Error fetching fundraisers:', error);
+            }
+        }
+        fetchFundraisers();
+    }, []);
 
     return (
         <>
@@ -29,40 +44,24 @@ const Home = () => {
 
                 <h2 className="text-center mb-4">Active Fundraisers</h2>
                 <Row className="mb-5">
-                    <Col md={4} className="mb-4">
-                        <Card className="shadow-sm custom-card">
-                            <Card.Img variant="top" src={animalrights} height="300" width="200" />
-                            <Card.Body>
-                                <Card.Title>Fundraiser Title 1</Card.Title>
-                                <Card.Text>Brief description of the fundraiser. Help support this cause and make a difference.</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={4} className="mb-4">
-                        <Card className="shadow-sm custom-card ">
-                            <Card.Img variant="top" src={familybro} height="300" width="200" />
-                            <Card.Body>
-                                <Card.Title>Fundraiser Title 2</Card.Title>
-                                <Card.Text>Brief description of the fundraiser. Help support this cause and make a difference.</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={4} className="mb-4">
-                        <Card className="shadow-sm custom-card">
-                            <Card.Img variant="top" src={baby1} height="300" width="200" />
-                            <Card.Body>
-                                <Card.Title>Fundraiser Title 3</Card.Title>
-                                <Card.Text>Brief description of the fundraiser. Help support this cause and make a difference.</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                    {fundraisers.map(fundraiser => (
+                        <Col md={4} className="mb-4" key={fundraiser._id}>
+                            <Card className="shadow-sm custom-card">
+                                <Card.Img variant="top" src={fundraiser.imageUrl} className="custom-card-img" />
+                                <Card.Body>
+                                    <Card.Title>{fundraiser.title}</Card.Title>
+                                    <Card.Text>{fundraiser.description}</Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
                 </Row>
-
+                
                 <Row className="text-center bg-white py-5">
                     <Col>
                         <h2>Join the Movement</h2>
                         <p>Be a part of something bigger. Start your own fundraiser or support one today!</p>
-                        <Button className="custom-button" onClick={handleSignUpClick}>Get Started</Button>
+                        <CustomButton onClick={handleStartedClick} style={{backgroundColor: '#463F3A', border: 'none'}}>Get Started</CustomButton>
                     </Col>
                 </Row>
             </Container>
