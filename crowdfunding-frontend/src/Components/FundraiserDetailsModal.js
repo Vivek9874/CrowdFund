@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, ProgressBar, Form } from 'react-bootstrap';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
-const FundraiserDetailsModal = ({ show, onHide, fundraiser, onContribute }) => {
+const FundraiserDetailsModal = ({ show, onHide, fundraiser }) => {
     const [contributionAmount, setContributionAmount] = useState('');
     const [localRaisedAmount, setLocalRaisedAmount] = useState(0);
     const [progress, setProgress] = useState(0);
@@ -14,7 +16,7 @@ const FundraiserDetailsModal = ({ show, onHide, fundraiser, onContribute }) => {
 
     if (!fundraiser) return null;
 
-    const raisedAmount = parseFloat(fundraiser.raisedAmount) || 0;
+    const raisedAmount = parseFloat(fundraiser.currentAmount) || 0;
     const targetAmount = parseFloat(fundraiser.targetAmount) || 0;
 
     const updateProgress = () => {
@@ -23,19 +25,31 @@ const FundraiserDetailsModal = ({ show, onHide, fundraiser, onContribute }) => {
         setProgress(newProgress);
     };
 
-    const handlePay = () => {
+    const handlePay = async () => {
         const amount = parseFloat(contributionAmount);
         if (amount && !isNaN(amount) && amount > 0) {
-            console.log(`Paying ₹${amount} for fundraiser ${fundraiser.title}`);
-            
-            setLocalRaisedAmount(prevAmount => prevAmount + amount);
-            
-            if (onContribute) {
-                onContribute(fundraiser.id, amount);
-            }
+            try {
+                // Decode JWT to get the user ID
+                const token = sessionStorage.getItem('token'); // Or however you store the token
+                const decodedToken = jwtDecode(token);
+                const userId = decodedToken.id;
 
-            alert('Thank you for supporting!');
-            setContributionAmount('');
+                // Send contribution data to the backend
+                await axios.post('/api/users/contribute', {
+                    fundraiserId: fundraiser._id,
+                    userId: userId,
+                    amount: amount
+                });
+
+                // Update local state
+                setLocalRaisedAmount(prevAmount => prevAmount + amount);
+                alert('Thank you for supporting!');
+                setContributionAmount('');
+                onHide(); // Close the modal after contribution
+            } catch (error) {
+                console.error('Error making contribution:', error);
+                alert('An error occurred while processing your contribution.');
+            }
         } else {
             alert('Please enter a valid amount.');
         }
@@ -52,18 +66,17 @@ const FundraiserDetailsModal = ({ show, onHide, fundraiser, onContribute }) => {
                 <p><strong>Category:</strong> {fundraiser.category}</p>
                 <p><strong>Target Amount:</strong> ₹{targetAmount.toFixed(2)}</p>
                 <p><strong>Amount Raised:</strong> ₹{(raisedAmount + localRaisedAmount).toFixed(2)}</p>
-               
-                {/* <ProgressBar now={progress} label={`${Math.round(progress)}%`} className="mb-3"/> */}
+
                 <ProgressBar 
                     now={progress} 
                     label={`${Math.round(progress)}%`} 
                     className="mb-3"
-                    style={{ backgroundColor: '#e9ecef' }} // This sets the background color of the unfilled part
+                    style={{ backgroundColor: '#e9ecef' }}
                 >
                     <ProgressBar 
                         now={progress} 
                         label={`${Math.round(progress)}%`} 
-                        style={{ backgroundColor: '#463F3A' }} // This sets the color of the progress part
+                        style={{ backgroundColor: '#463F3A' }}
                     />
                 </ProgressBar>
                 <Form.Group controlId="formContributionAmount">

@@ -19,6 +19,11 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    userType: {
+        type: String,
+        enum: ['admin', 'regular'],
+        default: 'regular',
+    },
 });
 
 // Remove or comment out the pre-save hook

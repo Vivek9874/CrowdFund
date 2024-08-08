@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -38,15 +38,15 @@ function SignIn() {
         password: ''
     });
 
-    const [error, setError] = React.useState(null); // State for server-side error message
+    const [error, setError] = React.useState(null);
     const navigate = useNavigate();
 
     const handleChange = (event) => {
         const { name, value } = event.target;
-        setFormValues({
-            ...formValues,
+        setFormValues(prevValues => ({
+            ...prevValues,
             [name]: value
-        });
+        }));
     };
 
     const validateForm = () => {
@@ -71,16 +71,16 @@ function SignIn() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
+    
         if (!validateForm()) {
             return; // Prevent form submission if validation fails
         }
-
+    
         const userData = {
             email: formValues.email,
             password: formValues.password,
         };
-
+    
         try {
             const response = await fetch('http://localhost:5000/api/users/signin', {
                 method: 'POST',
@@ -89,11 +89,11 @@ function SignIn() {
                 },
                 body: JSON.stringify(userData),
             });
-
+    
             if (response.ok) {
                 const result = await response.json();
-                //sessionStorage.removeItem('token'); // To ensure only one token is stored
-                sessionStorage.setItem('token', result.token); // Store the JWT token using sessionStorage
+                console.log(result.user); // Check if userType is 'admin'
+                sessionStorage.setItem('token', result.token);
                 sessionStorage.setItem('user', JSON.stringify(result.user));
                 navigate('/'); // Redirect to homepage
             } else {
@@ -104,6 +104,8 @@ function SignIn() {
             setError('An unexpected error occurred'); // Set generic error message
         }
     };
+    
+    
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -160,7 +162,7 @@ function SignIn() {
                         >
                             Sign In
                         </Button>
-                        {error && <Typography color="error">{error}</Typography>} {/* Display error */}
+                        {error && <Typography color="error">{error}</Typography>}
                         <Grid container>
                             <Grid item>
                                 <Link href="/sign-up" variant="body2">

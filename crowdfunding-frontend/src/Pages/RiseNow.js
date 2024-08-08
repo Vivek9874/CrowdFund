@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import FilterSection from '../Components/FilterSection';
-// import FundraiserSection from '../Components/FundraiserSection';
 import FundraiserDetailsModal from '../Components/FundraiserDetailsModal';
 import NavbarComponent from '../Components/NavbarComponent';
 import FooterComponent from '../Components/FooterComponent';
@@ -12,46 +11,26 @@ import { competition } from '../Images';
 import axios from 'axios';
 
 const RiseNow = () => {
-    //const location = useLocation();
     const navigate = useNavigate();
     const [fundraisers, setFundraisers] = useState([]);
     const [selectedFundraiser, setSelectedFundraiser] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
 
-    // Load fundraisers from localStorage
-    /*useEffect(async () => {
-        const imageResponse = await axios.get('/api/users/fundraisers');
-        console.log('Image Respone', imageResponse);
+    // Assuming you have a way to get the logged-in user ID, here it's hardcoded for demonstration.
+    const userId = 'YOUR_USER_ID';
 
-        //const storedFundraisers = JSON.parse(localStorage.getItem('fundraisers')) || [];
-        //setFundraisers(storedFundraisers);
-    }, []);*/
     useEffect(() => {
         async function fetchData() {
-            // You can await here
-            const imageResponse = await axios.get('/api/users/fundraisers');
-            //store data in state here
-            // console.log('Image Respone', imageResponse);
-            setFundraisers(imageResponse.data);
-            // ...
+            try {
+                const response = await axios.get('/api/users/fundraisers');
+                setFundraisers(response.data);
+            } catch (error) {
+                console.error('Error fetching fundraisers:', error);
+            }
         }
         fetchData();
     }, []);
-
-
-    // Add new fundraiser if state is provided
-    /*useEffect(() => {
-        if (location.state && location.state.newFundraiser) {
-            const newFundraiser = location.state.newFundraiser;
-            setFundraisers(prevFundraisers => {
-                const updatedFundraisers = [...prevFundraisers, newFundraiser];
-                localStorage.setItem('fundraisers', JSON.stringify(updatedFundraisers));
-                return updatedFundraisers;
-            });
-            navigate('.', { replace: true, state: {} });
-        }
-    }, [location.state, navigate]);*/
 
     const handleShowDetails = (fundraiser) => {
         setSelectedFundraiser(fundraiser);
@@ -62,22 +41,6 @@ const RiseNow = () => {
         setShowModal(false);
     };
 
-    // const handleDelete = (id) => {
-    //     const updatedFundraisers = fundraisers.filter(fundraiser => fundraiser.id !== id);
-    //     setFundraisers(updatedFundraisers);
-    //     localStorage.setItem('fundraisers', JSON.stringify(updatedFundraisers));
-    // };
-
-    const handleDelete = async (id) => {
-        try {
-            await axios.delete(`/api/users/fundraisers/${id}`);
-            const updatedFundraisers = fundraisers.filter(fundraiser => fundraiser._id !== id);
-            setFundraisers(updatedFundraisers);
-        } catch (error) {
-            console.error('Error deleting fundraiser:', error);
-        }
-    };
-
     const handleFundraiserForm = () => {
         navigate('/RaiserForm');
     };
@@ -86,10 +49,9 @@ const RiseNow = () => {
         setSelectedCategory(category);
     };
 
-    // Filter fundraisers based on selected category
-    const filteredFundraisers = selectedCategory
-        ? fundraisers.filter(fundraiser => fundraiser.category === selectedCategory)
-        : fundraisers;
+    const filteredFundraisers = fundraisers
+        .filter(fundraiser => fundraiser.status === 'approved') // Only approved fundraisers
+        .filter(fundraiser => !selectedCategory || fundraiser.category === selectedCategory); // Filter by category if selected
 
     return (
         <div id="root">
@@ -118,8 +80,7 @@ const RiseNow = () => {
                                         <b><Card.Title>{fundraiser.title}</Card.Title></b>
                                         <Card.Text>{fundraiser.description}</Card.Text>
                                         <div className="mt-auto d-flex justify-content-center">
-                                            <Button variant="primary" className="me-2" onClick={() => handleShowDetails(fundraiser)} style={{backgroundColor: '#463F3A', border: 'none'}}>View Details</Button>
-                                            <Button variant="danger" onClick={() => handleDelete(fundraiser._id)}>Delete</Button>
+                                            <Button variant="primary" className="me-2" onClick={() => handleShowDetails(fundraiser)} style={{ backgroundColor: '#463F3A', border: 'none' }}>View Details</Button>
                                         </div>
                                     </Card.Body>
                                 </Card>
@@ -129,7 +90,7 @@ const RiseNow = () => {
                 </Row>
             </Container>
 
-            <FundraiserDetailsModal show={showModal} onHide={handleHideModal} fundraiser={selectedFundraiser} />
+            <FundraiserDetailsModal show={showModal} onHide={handleHideModal} fundraiser={selectedFundraiser} userId={userId} />
 
             <FooterComponent />
         </div>

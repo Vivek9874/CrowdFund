@@ -1,11 +1,15 @@
-// Routes/RoutesConfig.js
+// RoutesConfig.js
 const express = require('express');
 const router = express.Router();
-const { signup, signin, getUsers } = require('../Controllers/userController');
-const authMiddleware = require('../Middlewares/authMiddleware');
-const { createFundraiser, fetchFundraiser, deleteFundraiser } = require('../Controllers/fundraiserController');
+const { signup, signin, getUsers, getUserFundraisers } = require('../Controllers/userController');
+const { createFundraiser, fetchFundraiser, fetchPendingFundraisers, deleteFundraiser, approveFundraiser, declineFundraiser, suggestChanges, updateFundraiser } = require('../Controllers/fundraiserController');
 const multer = require('multer');
 const path = require('path');
+const jwt  = require('jsonwebtoken'); 
+const { contributeToFundraiser, exportFundraiserTransactions } = require('../Controllers/FundraiserTransactionController');
+// const { exportFundraiserTransactions } = require('../Controllers/FundraiserTransactionController');
+
+
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
@@ -21,10 +25,44 @@ const upload = multer({ storage: storage });
 
 // Routes
 router.post('/signup', signup);
-router.route('/signin').post(signin).get(getUsers);
 router.post('/signin', signin);
-router.route('/fundraisers').post(createFundraiser).get(fetchFundraiser);
-router.delete('/fundraisers/:id', deleteFundraiser); // Add this line for deleting fundraisers
+router.get('/users', getUsers);
+
+// Route for fetching user's fundraisers without authentication
+// router.get('/my-fundraisers', async (req, res) => {
+//   try {
+//       const token = req.headers.authorization?.split(' ')[1]; // Extract token from 'Bearer TOKEN'
+//       if (!token) {
+//           return res.status(401).json({ message: 'No token provided' });
+//       }
+
+//       // Verify token
+//       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//       const userId = decoded.id;
+
+//       // Fetch fundraisers created by this user
+//       const myfundraisers = await fundraisers.find({ createdBy: userId });
+//       res.status(200).json(myfundraisers);
+//   } catch (error) {
+//       console.error('Error fetching user fundraisers:', error);
+//       res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+router.get('/my-fundraisers', getUserFundraisers); 
+router.post('/fundraisers', createFundraiser);
+router.get('/fundraisers', fetchFundraiser);
+router.get('/fundraisers/pending', fetchPendingFundraisers);
+router.delete('/fundraisers/:id', deleteFundraiser);
+router.post('/fundraisers/:id/approve', approveFundraiser);
+router.post('/fundraisers/:id/decline', declineFundraiser);
+router.post('/fundraisers/:id/suggest-changes', suggestChanges);
+router.put('/fundraisers/:id', updateFundraiser); // Ensure this route is added
+
+router.post('/contribute', contributeToFundraiser); 
+
+router.get('/fundraisers/export/:fundraiserId', exportFundraiserTransactions);
+
 router.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
@@ -32,11 +70,6 @@ router.post('/upload', upload.single('image'), (req, res) => {
 
   const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
   res.status(200).send({ imageUrl });
-});
-
-// Example of a protected route
-router.get('/protected', authMiddleware, (req, res) => {
-  res.send('This is a protected route');
 });
 
 module.exports = router;

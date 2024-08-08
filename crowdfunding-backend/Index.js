@@ -3,6 +3,7 @@ const cors = require('cors');
 //const dotenv = require('dotenv');
 const connectDB = require('./config/db'); // Import the database connection function
 const path = require('path');
+const bodyParser = require('body-parser');
 
 //dotenv.config();
 
@@ -30,6 +31,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/users', require('./Routes/RoutesConfig')); // This line includes your routes
+
+app.use(bodyParser.json()); // For parsing application/json
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

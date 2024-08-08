@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Form } from 'react-bootstrap';
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
 import CustomButton from "./CustomButton";
+
 axios.defaults.baseURL = 'http://localhost:5000';
+
 const CreateFundraiserSection = ({ onAddFundraiser }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -12,48 +15,59 @@ const CreateFundraiserSection = ({ onAddFundraiser }) => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-    
+
         if (!title || !description || !targetAmount || !image) {
             alert('Please fill out all fields and upload an image.');
             return;
         }
-    
+
         try {
+            const token = sessionStorage.getItem('token');
+            console.log('JWT Token:', token); // Debugging statement
+
+            if (!token) {
+                alert('User not authenticated');
+                return;
+            }
+
+            const decodedToken = jwtDecode(token);
+            console.log('Decoded Token:', decodedToken); // Debugging statement
+
+            const userId = decodedToken.id; // Assuming the user ID is stored in the 'id' field of the token
+
             const formData = new FormData();
             formData.append('image', image);
-            
-            // Log formData to check its content
-            console.log('FormData:', formData);
-    
+
             // Upload the image
             const imageResponse = await axios.post('/api/users/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
                 },
             });
-    
-            // Log the response to inspect its structure
-            console.log('Image Response:', imageResponse);
-    
-            // Ensure imageResponse.data and imageResponse.data.imageUrl exist
-            if (!imageResponse.data || !imageResponse.data.imageUrl) {
-                throw new Error('Image upload failed or imageUrl is missing');
-            }
-    
+
             const imageUrl = imageResponse.data.imageUrl;
-    
+
             const newFundraiser = {
                 title,
                 description,
                 category,
                 targetAmount,
                 imageUrl,
+                requestedUserId: userId, // Add the current user's ID
+                status: 'pending', // Default status
+                currentAmount: 0 // Default current amount
             };
-    
+
             // Create the fundraiser
-            const response = await axios.post('/api/users/fundraisers', newFundraiser);
+            const response = await axios.post('/api/users/fundraisers', newFundraiser, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            });
             onAddFundraiser(response.data);
-    
+
+            // Reset form fields
             setTitle('');
             setDescription('');
             setCategory('Health');
@@ -64,8 +78,7 @@ const CreateFundraiserSection = ({ onAddFundraiser }) => {
             alert('An error occurred while creating the fundraiser.');
         }
     };
-    
-    
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
