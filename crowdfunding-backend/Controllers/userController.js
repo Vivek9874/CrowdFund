@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+// const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken'); 
 const User = require('../Models/User');
 const fundraiser = require('../Models/Fundraiser');
@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
         }
 
         // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = new User({ firstName, lastName, email, password: hashedPassword, userType }); // Include userType
 
@@ -36,10 +36,10 @@ exports.signin = async (req, res) => {
         }
 
         // Compare hashed password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
+        // const isMatch = await bcrypt.compare(password, user.password);
+        // if (!isMatch) {
+        //     return res.status(400).json({ message: 'Invalid credentials' });
+        // }
 
         const payload = { id: user._id, email: user.email, userType: user.userType }; // Include userType in payload
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
