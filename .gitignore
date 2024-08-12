@@ -25,3 +25,6 @@ Thumbs.db
 
 #ignore intellij folder
 .idea/
+
+#ignore dbconfig
+DB Config.txt
